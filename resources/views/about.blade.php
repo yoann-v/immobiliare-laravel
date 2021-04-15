@@ -1,20 +1,37 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laravel</title>
-</head>
-<body>
-    <h1>Hello Laravel</h1>
+@extends('layouts/app')
 
-    <?php echo date('d/m/Y');
-    {{date('d/m/Y')}}
+@section('title')
+    A propos - @parent
+@endsection
 
+@section('content')
+
+    <h1>Hello {{ $name }}</h1>
+
+    <ul>
+        @foreach ($bibis as $bibi)
+            <li>
+                {{ $loop->index }} {{ $bibi }}
+            </li>
+        @endforeach
+    </ul>
+
+    <h2>Blade simplifie le PHP</h2>
+    <?php echo date('d/m/Y'); ?>
+    {{ date('d/m/Y') }}
+
+    <h2>If en Blade</h2>
     @if (1 === 1)
-        bla bla 
+        Je suis un if
     @endif
 
-    
-</body>
-</html>
+    <h2>Boucle en Blade</h2>
+    @for ($i = 0; $i < 10; $i++)
+        {{ $i }}
+    @endfor
+
+    <h2>Protection XSS en Blade</h2>
+    {{ '<script>alert("toto")</script>' }}
+    {!! '<h1>Pas de protection XSS</h1>' !!}
+@endsection
+
