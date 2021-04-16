@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,21 @@ Route::get('/annonce/creer', function () {
     return view('properties/create');
 });
 
-Route::post('/annonce/creer', function () {
-    return view('properties/create');
+Route::post('/annonce/creer', function (Request $request) {
+    $request->validate([
+        'title' => 'required|string|unique:properties|min:2',
+        'description' => 'required|string|min:15',
+        'price' =>'required|integer|gt:0',
+    ]);
+
+    DB::table('properties')->insert([
+        'title' => $request->title,
+        'description' => $request->description,
+        'price' => $request->price,
+        'sold' => $request->filled('sold'),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return redirect('/nos-annonces')->withInput();
 });

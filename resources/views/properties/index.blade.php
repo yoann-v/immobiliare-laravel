@@ -7,6 +7,12 @@
             <a href="/annonce/creer" class="btn btn-primary">Créer une annonce</a>
         </div>
 
+        @if (old())
+            <div class="alert alert-success">
+                L'annonce {{ old('title') }} a été ajoutée avec succès.
+            </div>
+        @endif
+
         <div class="row">
             @foreach ($properties as $property)
             <div class="col-lg-3">
