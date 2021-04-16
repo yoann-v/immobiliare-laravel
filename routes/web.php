@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,8 +19,45 @@ Route::get('/', function () {
 });
 
 Route::get('/a-propos', function () {
+    $name = 'Valentina';
+
     return view('about', [
-        'name' => 'Valentina',
+        'name' => $name,
         'bibis' => [1, 2, 3, 4]
     ]);
+});
+
+route::get('/hello/{name}', function ($name) {
+    return "<h1>Hello $name</h1>";
+});
+
+Route::get('/nos-annonces', function () {
+    $properties = DB::select('select * from properties where sold = :sold', [
+        'sold' => 0,
+    ]);
+
+    $properties = DB::table('properties')
+        ->where('sold', 0)->where('sold', '=', 1, 'or')->get();
+
+    return view('properties/index', [
+        'properties' => $properties,
+    ]);
+});
+
+Route::get('/annonce/{id}', function ($id) {
+    $property = DB::table('properties')->find($id);
+
+    if (! $property) {
+        abort(404);
+    }
+
+    return view('properties/show', ['property' => $property]);
+})->whereNumber('id');
+
+Route::get('/annonce/creer', function () {
+    return view('properties/create');
+});
+
+Route::post('/annonce/creer', function () {
+    return view('properties/create');
 });
