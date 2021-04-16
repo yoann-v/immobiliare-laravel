@@ -2,18 +2,7 @@
 
 @section('content')
     <div class="container">
-        <h2>Form en GET</h2>
-        @if (request('name'))
-        Bonjour {{ request('name') }}
-        @endif
-
-        <form action="">
-            <input type="text" name="name">
-
-            <button class="btn btn-primary">Envoyer</button>
-        </form>
-
-        <h2>Form en POST</h2>
+        <h2>Modifier {{ $property->title }}</h2>
 
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -25,11 +14,21 @@
             </div>
         @endif
 
+        @if (session('message'))
+            <div class="alert alert-success">
+                {{ session('message') }}
+            </div>
+        @endif
+
         <form action="" method="post">
+
             @csrf
+
+            @method('put')
+
             <div>
                 <label for="title">Titre</label>
-                <input type="text" name="title" id="title" class="form-control" value="{{ old('title') }}">
+                <input type="text" name="title" id="title" class="form-control" value="{{ old('title') ?? $property->title }}">
 
                 @error('title')
                     <span class="text-danger">{{ $message }}</span>
@@ -37,18 +36,18 @@
             </div>
             <div>
                 <label for="description">Description</label>
-                <textarea name="description" id="description" class="form-control" value="{{ old('description') }}"></textarea>
+                <textarea name="description" id="description" class="form-control">{{ old('description') ?? $property->description }}</textarea>
             </div>
             <div>
                 <label for="price">Prix</label>
-                <input type="text" name="price" id="price" class="form-control" value="{{ old('price') }}">
+                <input type="text" name="price" id="price" class="form-control" value="{{ old('price') ?? $property->price }}">
             </div>
             <div class="form-check">
-                <input type="checkbox" name="sold" id="sold" class="form-check-input" {{ old('sold') ? 'checked' : '' }}>
+                <input type="checkbox" name="sold" id="sold" class="form-check-input" {{ old('sold', $property->sold) ? 'checked' : '' }}>
                 <label for="sold">Vendu ?</label>
             </div>
 
-            <button class="btn btn-primary">Ajouter</button>
+            <button class="btn btn-primary">Modifier</button>
         </form>
     </div>
 @endsection

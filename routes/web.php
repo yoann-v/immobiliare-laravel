@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PropertyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -32,48 +33,16 @@ route::get('/hello/{name}', function ($name) {
     return "<h1>Hello $name</h1>";
 });
 
-Route::get('/nos-annonces', function () {
-    $properties = DB::select('select * from properties where sold = :sold', [
-        'sold' => 0,
-    ]);
+Route::get('/nos-annonces', [PropertyController::class, 'index']);
 
-    $properties = DB::table('properties')
-        ->where('sold', 0)->where('sold', '=', 1, 'or')->get();
+Route::get('/annonce/{id}', [PropertyController::class, 'show'])->whereNumber('id');
 
-    return view('properties/index', [
-        'properties' => $properties,
-    ]);
-});
+Route::get('/annonce/creer', [PropertyController::class, 'create']);
 
-Route::get('/annonce/{id}', function ($id) {
-    $property = DB::table('properties')->find($id);
+Route::post('/annonce/creer', [PropertyController::class, 'store']);
 
-    if (! $property) {
-        abort(404);
-    }
+Route::get('/annonce/editer/{id}', [PropertyController::class, 'edit']);
 
-    return view('properties/show', ['property' => $property]);
-})->whereNumber('id');
+Route::put('/annonce/editer/{id}', [PropertyController::class, 'update']);
 
-Route::get('/annonce/creer', function () {
-    return view('properties/create');
-});
-
-Route::post('/annonce/creer', function (Request $request) {
-    $request->validate([
-        'title' => 'required|string|unique:properties|min:2',
-        'description' => 'required|string|min:15',
-        'price' =>'required|integer|gt:0',
-    ]);
-
-    DB::table('properties')->insert([
-        'title' => $request->title,
-        'description' => $request->description,
-        'price' => $request->price,
-        'sold' => $request->filled('sold'),
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    return redirect('/nos-annonces')->withInput();
-});
+Route::delete('/annonce/{id}', [PropertyController::class, 'destroy']);
