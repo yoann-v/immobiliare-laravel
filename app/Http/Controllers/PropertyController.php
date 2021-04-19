@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PropertyController extends Controller
 {
@@ -18,18 +20,19 @@ class PropertyController extends Controller
             ->where('sold', 0)->where('sold', '=', 1, 'or')->get();
     
         return view('properties/index', [
-            'properties' => $properties,
+            'properties' => Property::all(),
+            //'properties' => Property::where('sold', 0)->get(),
         ]);
     }
 
     /**Affiche une annonce */
-    public function show($id)
+    public function show(Property $property)
     {
-            $property = DB::table('properties')->find($id);
+        //     $property = DB::table('properties')->find($id);
 
-        if (! $property) {
-            abort(404);
-        }
+        // if (! $property) {
+        //     abort(404);
+        // }
 
         return view('properties/show', ['property' => $property]);
     }
@@ -46,17 +49,35 @@ class PropertyController extends Controller
         $request->validate([
             'title' => 'required|string|unique:properties|min:2',
             'description' => 'required|string|min:15',
+            'image' => 'required|image',
             'price' =>'required|integer|gt:0',
         ]);
+        
+        $path = null;
+        if ($request->hasFile('image')) {
+            $path = $request->image->store(
+                'public/annonces', 
+            );
+        }
     
-        DB::table('properties')->insert([
+        /*DB::table('properties')->insert([
             'title' => $request->title,
             'description' => $request->description,
+            'image' => str_replace('public', '/storage', $path),
             'price' => $request->price,
             'sold' => $request->filled('sold'),
             'created_at' => now(),
             'updated_at' => now(),
+        ]);*/
+
+        Property::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => str_replace('public', '/storage', $path),
+            'price' => $request->price,
+            'sold' => $request->filled('sold'),
         ]);
+        
     
         return redirect('/nos-annonces')->withInput();
     }
@@ -64,11 +85,13 @@ class PropertyController extends Controller
     /**Form pour éditer une annonce */
     public function edit($id)
     {
-        $property = DB::table('properties')->find($id);
+        /*$property = DB::table('properties')->find($id);
 
         if (! $property) {
             abort(404);
-        }
+        }*/
+
+        $property = Property::findOrFail($id);
 
         return view('properties/edit', ['property' => $property]);
     }
@@ -81,13 +104,13 @@ class PropertyController extends Controller
             'description' => 'required|string|min:15',
             'price' =>'required|integer|gt:0',
         ]);
-
-        DB::table('properties')->where('id', $id)->update([
+        
+        //DB::table('properties')->where('id', $id)
+        Property::findOrFail($id)->update([
             'title' => $request->title,
             'description' => $request->description,
             'price' => $request->price,
             'sold' => $request->filled('sold'),
-            'updated_at' => now(),
         ]);
 
         return redirect('/nos-annonces')
@@ -97,7 +120,17 @@ class PropertyController extends Controller
     /**Supprimer une annonce ds la bdd */
     public function destroy($id)
     {
-        DB::table('properties')->delete($id);
+        //$property = DB::table('properties')->find($id);
+        $property = Property::findOrFail($id);
+
+        if ($property->image) {
+            Storage::delete(
+                str_replace('/storage', 'public', $property->image)
+            );     
+        }
+
+        //DB::table('properties')->delete($id);
+        $property->delete();
 
         return redirect('/nos-annonces')
             ->with('message', 'Annonce supprimée.');

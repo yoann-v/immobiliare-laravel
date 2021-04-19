@@ -25,7 +25,7 @@
             </div>
         @endif
 
-        <form action="" method="post">
+        <form action="/annonce/creer" method="post" enctype="multipart/form-data">
             @csrf
             <div>
                 <label for="title">Titre</label>
@@ -34,6 +34,10 @@
                 @error('title')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
+            </div>
+            <div>
+                <label for="image">Image</label>
+                <input type="file" name="image" id="image">
             </div>
             <div>
                 <label for="description">Description</label>
